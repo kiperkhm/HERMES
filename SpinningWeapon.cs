@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class SpinningWeapon : MonoBehaviour
@@ -11,12 +12,15 @@ public class SpinningWeapon : MonoBehaviour
     public float farDistance = 1f; // 두 프리팹 사이의 거리
 
     private bool isCoolingDown = false; // 쿨다운 중인지 여부를 나타내는 변수
+    private List<GameObject> instantiatedPrefabs = new List<GameObject>(); // 생성된 프리팹을 저장하는 리스트
 
     private void Update()
     {
         // "Standard" 키가 눌렸을 때 실행하고 쿨다운 중이 아닌 경우에만 실행
         if (Input.GetButtonDown("Standard") && !isCoolingDown)
         {
+            // 쿨다운 시작
+            StartCoroutine(CoolDown());
             // 레이를 쏘아 목표 방향을 설정
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
@@ -48,8 +52,8 @@ public class SpinningWeapon : MonoBehaviour
         // 왼쪽의 프리팹을 생성하고 이동시키는 코루틴 실행
         StartCoroutine(MovePrefab(prefab, sidePos2, sidePos2 + (hit.point - playerPosition).normalized * SOStandard.SkillDistance));
 
-        // 쿨다운 시작
-        StartCoroutine(CoolDown());
+        // 스킬 지속 시간 후에 모든 프리팹을 삭제하는 코루틴 실행
+        StartCoroutine(DestroyAllPrefabsAfterDuration(SOStandard.SkillDuration));
     }
 
     // 프리팹을 이동시키는 함수
@@ -57,6 +61,7 @@ public class SpinningWeapon : MonoBehaviour
     {
         // 프리팹을 시작 위치에 생성
         GameObject instance = Instantiate(prefab, startPos, Quaternion.identity);
+        instantiatedPrefabs.Add(instance); // 리스트에 추가
 
         // 경과 시간 초기화
         float elapsedTime = 0f;
@@ -77,10 +82,22 @@ public class SpinningWeapon : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
+    }
 
-        // 일정 시간이 지난 후에 프리팹 삭제
-        yield return new WaitForSeconds(SOStandard.SkillDuration);
-        Destroy(instance);
+    // 스킬 지속 시간 후에 모든 프리팹을 삭제하는 함수
+    IEnumerator DestroyAllPrefabsAfterDuration(float duration)
+    {
+        // 스킬 지속 시간 대기
+        yield return new WaitForSeconds(duration);
+
+        // 모든 프리팹 삭제
+        foreach (GameObject instance in instantiatedPrefabs)
+        {
+            Destroy(instance);
+        }
+
+        // 리스트 초기화
+        instantiatedPrefabs.Clear();
 
         // 쿨다운 시작
         StartCoroutine(CoolDown());
@@ -91,8 +108,10 @@ public class SpinningWeapon : MonoBehaviour
     {
         // 쿨다운 중 플래그 설정
         isCoolingDown = true;
+
         // 쿨다운 기간만큼 대기
         yield return new WaitForSeconds(SOStandard.Cooltime);
+
         // 쿨다운 종료 후 플래그 해제
         isCoolingDown = false;
     }
