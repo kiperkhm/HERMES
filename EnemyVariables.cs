@@ -2,52 +2,55 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyVariables : MonoBehaviour
+public class Stat
 {
-    public enum MonsterType
-    {
-        BasicMeleeAttack,
-        BasicRangeAttack,
-        BasicSummoner,
-    }
-    public MonsterType type;
+    public UnitCode unitCode { get; }
+    public string name { get; set; }
+    public int maxHp { get; set; }
+    public int curHp { get; set; }
+    public int Damage { get; set; }
+    public float originalSpeed { get; set; }
+    public float AttackRange { get; set; }
+    public float AttackSpeed { get; set; }
+    public float beforeCastDelay { get; set; }
 
-    public string enemyType = "Null";
-    public float Original_Health = 0;
-    public float Original_Speed = 0;
-    public float Attack_Range = 0;
-    public float Attack_Speed = 0;
-    public float before_cast_delay = 0;
-    /*
-    void OnEnable()
+    public Stat()
     {
-        switch (type)
+
+    }
+
+    public Stat(UnitCode unitCode, string name, int maxHp, int damage, float originalSpeed, float attackRange, float attackSpeed, float beforeCastDelay)
+    {
+        this.unitCode = unitCode;
+        this.name = name;
+        this.maxHp = maxHp;
+        curHp = maxHp;
+        this.Damage = damage;
+        this.originalSpeed = originalSpeed;
+        this.AttackRange = attackRange;
+        this.AttackSpeed = attackSpeed;
+        this.beforeCastDelay = beforeCastDelay;
+    }
+
+    public Stat SetUnitStat(UnitCode unitCode)
+    {
+        Stat stat = null;
+
+        switch(unitCode)
         {
-            case MonsterType.BasicMeleeAttack:
-                //enemyType = "BasicMeleeAttack";
-                //OriginalHealth = 20f;
-                //OriginalSpeed = 3f;
-                //AttackRange = 2.5f;
-                //AttackSpeed = 3f;
+            case UnitCode.Vengeful_Warrior: //이름, 최대체력, 공격력, 속도, 공격범위, 공격속도, 선딜 _순서
+                stat = new Stat(unitCode, "Vengeful_Warrior", 150, 20, 5f, 2f, 2f, 2f);
                 break;
-            case MonsterType.BasicRangeAttack:
-                //enemyType = "BasicRangeAttack";
-                //OriginalHealth = 10f;
-                //OriginalSpeed = 1.5f;
-                //AttackRange = 8f;
-                //AttackSpeed = 3f;
+            case UnitCode.Grudge_Archer:
+                stat = new Stat(unitCode, "Grudge_Archer", 100, 20, 4f, 6f, 2f, 4f);
                 break;
-            case MonsterType.BasicSummoner:
-                //enemyType = "BasicSummoner";
-                //OriginalHealth = 20f;
-                //OriginalSpeed = 3f;
-                //AttackRange = 2.5f;
-                //AttackSpeed = 1f;
+            case UnitCode.BasicSummoner:
+                stat = new Stat(unitCode, "BasicSummoner", 100, 20, 6f, 3f, 2f, 8f);
+                break;
+            case UnitCode.Slime:
+                stat = new Stat(unitCode, "Slime", 300, 20, 2f, 2f, 2f, 8f);
                 break;
         }
-        //Debug.Log
+        return stat;
     }
-    
-    // _monsterController.original
-    */
 }
